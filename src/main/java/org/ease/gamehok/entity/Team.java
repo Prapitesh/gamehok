@@ -21,7 +21,7 @@ public class Team implements Serializable {
 
     private String teamName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 }

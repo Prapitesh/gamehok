@@ -4,6 +4,7 @@ import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.service.MatchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,4 +28,27 @@ public class MatchController {
         return matchService.getMatchById(id);
     }
 
+    @GetMapping
+    public Page<Match> getAllMatches(
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "5")
+            int size,
+
+            @RequestParam(defaultValue = "id")
+            String sortBy,
+
+            @RequestParam(required = false)
+            String status
+    ) {
+
+        return matchService.getAllMatches(
+                page,
+                size,
+                sortBy,
+                status
+        );
+    }
 }

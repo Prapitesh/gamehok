@@ -11,7 +11,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "matches")
+@Table(
+        indexes = {
+                @Index(name = "idx_match_status",
+                        columnList = "status"),
+
+                @Index(name = "idx_round_number",
+                        columnList = "round_number")
+        }
+)
 public class Match implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -20,15 +28,15 @@ public class Match implements Serializable {
 
     private Integer roundNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team1_id")
     private Team team1;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team2_id")
     private Team team2;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "winner_team_id")
     private Team winner;
 

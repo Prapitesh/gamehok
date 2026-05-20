@@ -2,12 +2,17 @@ package org.ease.gamehok.service;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.ease.gamehok.dto.MatchResponseDto;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.exception.ResourceNotFoundException;
 import org.ease.gamehok.repository.MatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Slf4j
 @Service
@@ -88,5 +93,45 @@ public class MatchService {
         redisMatchCacheService.saveMatch(updatedMatch);
 
         return updatedMatch;
+    }
+
+    public Page<Match> getAllMatches(
+            int page,
+            int size,
+            String sortBy,
+            String status
+    ) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(sortBy)
+        );
+
+        if (status != null && !status.isEmpty()) {
+            return matchRepository.findByStatus(
+                    status,
+                    pageable
+            );
+        }
+
+        return matchRepository.findAll(pageable);
+    }
+
+    public MatchResponseDto mapToDto(Match match) {
+
+        return MatchResponseDto.builder()
+                .id(match.getId())
+                .roundNumber(match.getRoundNumber())
+                .team1(match.getTeam1().getTeamName())
+                .team2(match.getTeam2().getTeamName())
+                .winner(
+                        match.getWinner() != null
+                                ? match.getWinner()
+                                .getTeamName()
+                                : null
+                )
+                .status(match.getStatus())
+                .build();
     }
 }
