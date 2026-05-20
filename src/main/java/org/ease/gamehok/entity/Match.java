@@ -34,5 +34,6 @@ public class Match implements Serializable {
 
     private String status;
 
+    @Column(name = "next_match_id")
     private Long nextMatchId;
 }

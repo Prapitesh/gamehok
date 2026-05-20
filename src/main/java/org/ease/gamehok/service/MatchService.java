@@ -4,6 +4,7 @@ package org.ease.gamehok.service;
 import lombok.extern.slf4j.Slf4j;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
+import org.ease.gamehok.exception.ResourceNotFoundException;
 import org.ease.gamehok.repository.MatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,32 @@ public class MatchService {
 
     public Match getMatchById(Long matchId) {
 
-        Match cachedMatch = redisMatchCacheService.getMatch(matchId);
+        Match cachedMatch = null;
+
+        try {
+            cachedMatch =
+                    redisMatchCacheService.getMatch(matchId);
+        } catch (Exception e) {
+            System.out.println("Redis unavailable");
+        }
+
         if (cachedMatch != null) {
             log.info("Fetched from Redis Cache");
             return cachedMatch;
         }
 
         Match dbMatch = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Match not found"
+                        )
+                );
 
-        redisMatchCacheService.saveMatch(dbMatch);
+        try {
+            redisMatchCacheService.saveMatch(dbMatch);
+        } catch (Exception e) {
+            System.out.println("Redis unavailable");
+        }
 
         log.info("Fetched from PostgreSQL");
 
@@ -37,12 +54,36 @@ public class MatchService {
     public Match submitResult(Long matchId, Team winner) {
 
         Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Match not found"
+                        )
+                );
 
         match.setWinner(winner);
         match.setStatus("COMPLETED");
 
         Match updatedMatch = matchRepository.save(match);
+
+        // MOVE WINNER TO NEXT MATCH
+        if (updatedMatch.getNextMatchId() != null) {
+
+            Match nextMatch = matchRepository.findById(
+                    updatedMatch.getNextMatchId()
+            ).orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Next match not found"
+                    )
+            );
+
+            if (nextMatch.getTeam1() == null) {
+                nextMatch.setTeam1(winner);
+            } else {
+                nextMatch.setTeam2(winner);
+            }
+
+            matchRepository.save(nextMatch);
+        }
 
         redisMatchCacheService.saveMatch(updatedMatch);
 

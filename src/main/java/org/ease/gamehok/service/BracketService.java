@@ -1,9 +1,9 @@
 package org.ease.gamehok.service;
 
+import lombok.RequiredArgsConstructor;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.repository.MatchRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,8 +20,9 @@ public class BracketService {
 
         Collections.shuffle(teams);
 
-        List<Match> matches = new ArrayList<>();
+        List<Match> firstRoundMatches = new ArrayList<>();
 
+        // ROUND 1
         for (int i = 0; i < teams.size(); i += 2) {
 
             Match match = Match.builder()
@@ -31,9 +32,42 @@ public class BracketService {
                     .status("PENDING")
                     .build();
 
-            matches.add(match);
+            firstRoundMatches.add(match);
         }
 
-        return matchRepository.saveAll(matches);
+        List<Match> savedMatches =
+                matchRepository.saveAll(firstRoundMatches);
+
+        // CREATE NEXT ROUND PLACEHOLDERS
+        List<Match> nextRoundMatches = new ArrayList<>();
+
+        for (int i = 0; i < savedMatches.size() / 2; i++) {
+
+            Match nextRoundMatch = Match.builder()
+                    .roundNumber(2)
+                    .status("PENDING")
+                    .build();
+
+            nextRoundMatches.add(nextRoundMatch);
+        }
+
+        List<Match> savedNextRound =
+                matchRepository.saveAll(nextRoundMatches);
+
+        // LINK MATCHES
+        int index = 0;
+
+        for (int i = 0; i < savedMatches.size(); i += 2) {
+
+            Match m1 = savedMatches.get(i);
+            Match m2 = savedMatches.get(i + 1);
+
+            Match next = savedNextRound.get(index++);
+
+            m1.setNextMatchId(next.getId());
+            m2.setNextMatchId(next.getId());
+        }
+
+        return matchRepository.saveAll(savedMatches);
     }
 }

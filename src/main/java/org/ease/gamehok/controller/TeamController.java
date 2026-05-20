@@ -1,5 +1,6 @@
 package org.ease.gamehok.controller;
 
+import jakarta.validation.Valid;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.service.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping("/register")
-    public Team registerTeam(@RequestBody Team team) {
+    public Team registerTeam(@Valid @RequestBody Team team) {
         return teamService.registerTeam(team);
     }
 

@@ -1,5 +1,6 @@
 package org.ease.gamehok.controller;
 
+import jakarta.validation.Valid;
 import org.ease.gamehok.entity.Tournament;
 import org.ease.gamehok.service.TournamentService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ public class TournamentController {
     private final TournamentService tournamentService;
 
     @PostMapping
-    public Tournament createTournament(@RequestBody Tournament tournament) {
+    public Tournament createTournament(@Valid @RequestBody Tournament tournament) {
         return tournamentService.createTournament(tournament);
     }
 }
