@@ -1,7 +1,10 @@
 package org.ease.gamehok.controller;
 
+import org.ease.gamehok.dto.MatchResultRequest;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
+import org.ease.gamehok.repository.MatchRepository;
+import org.ease.gamehok.repository.TeamRepository;
 import org.ease.gamehok.service.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,15 +16,25 @@ import org.springframework.web.bind.annotation.*;
 public class MatchController {
 
     private final MatchService matchService;
-
+private final MatchRepository matchRepository;
+private final TeamRepository teamRepository;
     @PostMapping("/{matchId}/result")
     public Match submitResult(
             @PathVariable Long matchId,
-            @RequestBody Team winner
+            @RequestBody MatchResultRequest request
     ) {
-        return matchService.submitResult(matchId, winner);
-    }
 
+        Team winner = teamRepository.findById(
+                request.getWinnerId()
+        ).orElseThrow(() ->
+                new RuntimeException("Team not found")
+        );
+
+        return matchService.submitResult(
+                matchId,
+                winner
+        );
+    }
     @GetMapping("/{id}")
     public Match getMatchById(@PathVariable Long id) {
 

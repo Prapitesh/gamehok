@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class MatchResultRequest {
 
-    private Long winnerTeamId;
+    private Long winnerId;
 }

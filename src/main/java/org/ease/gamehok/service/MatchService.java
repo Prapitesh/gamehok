@@ -3,6 +3,7 @@ package org.ease.gamehok.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ease.gamehok.dto.MatchResponseDto;
+import org.ease.gamehok.dto.MatchUpdateMessage;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.exception.ResourceNotFoundException;
@@ -13,12 +14,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchService {
 
+    private final SimpMessagingTemplate messagingTemplate;
     private final MatchRepository matchRepository;
     private final RedisMatchCacheService redisMatchCacheService;
 
@@ -56,41 +59,42 @@ public class MatchService {
         return dbMatch;
     }
 
-    public Match submitResult(Long matchId, Team winner) {
+    public Match submitResult(
+            Long matchId,
+            Team winner
+    ) {
 
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(
+                        new RuntimeException(
                                 "Match not found"
                         )
                 );
 
         match.setWinner(winner);
+
         match.setStatus("COMPLETED");
 
-        Match updatedMatch = matchRepository.save(match);
+        Match updatedMatch =
+                matchRepository.save(match);
 
-        // MOVE WINNER TO NEXT MATCH
-        if (updatedMatch.getNextMatchId() != null) {
+        MatchUpdateMessage message =
+                MatchUpdateMessage.builder()
+                        .matchId(updatedMatch.getId())
+                        .winner(
+                                updatedMatch.getWinner()
+                                        .getTeamName()
+                        )
+                        .status(updatedMatch.getStatus())
+                        .roundNumber(
+                                updatedMatch.getRoundNumber()
+                        )
+                        .build();
 
-            Match nextMatch = matchRepository.findById(
-                    updatedMatch.getNextMatchId()
-            ).orElseThrow(() ->
-                    new ResourceNotFoundException(
-                            "Next match not found"
-                    )
-            );
-
-            if (nextMatch.getTeam1() == null) {
-                nextMatch.setTeam1(winner);
-            } else {
-                nextMatch.setTeam2(winner);
-            }
-
-            matchRepository.save(nextMatch);
-        }
-
-        redisMatchCacheService.saveMatch(updatedMatch);
+        messagingTemplate.convertAndSend(
+                "/topic/matches",
+                message
+        );
 
         return updatedMatch;
     }
