@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 @RequiredArgsConstructor
 public class MatchService {
 
+
     private final SimpMessagingTemplate messagingTemplate;
     private final MatchRepository matchRepository;
     private final RedisMatchCacheService redisMatchCacheService;
