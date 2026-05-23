@@ -3,6 +3,7 @@ package org.ease.gamehok.service;
 import lombok.RequiredArgsConstructor;
 import org.ease.gamehok.dto.AuthRequest;
 import org.ease.gamehok.dto.AuthResponse;
+import org.ease.gamehok.entity.Role;
 import org.ease.gamehok.entity.User;
 import org.ease.gamehok.repository.UserRepository;
 import org.ease.gamehok.security.JwtService;
@@ -25,7 +26,7 @@ public class AuthService {
                 encoder.encode(user.getPassword())
         );
 
-        user.setRole("PLAYER");
+        user.setRole(Role.PLAYER);
 
         return userRepository.save(user);
     }
@@ -45,9 +46,7 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-        String token =
-                jwtService.generateToken(user.getEmail());
-
+        String token = jwtService.generateToken(user);
         return new AuthResponse(token);
     }
 }

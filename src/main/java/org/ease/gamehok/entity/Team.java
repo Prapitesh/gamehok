@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Getter
 @Setter
@@ -12,6 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @Table(name = "teams")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Team implements Serializable {
 
     private static final long serialVersionUID = 1L;

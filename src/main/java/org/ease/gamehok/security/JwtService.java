@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.ease.gamehok.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -15,10 +16,11 @@ public class JwtService {
     private static final SecretKey SECRET_KEY =
             Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String email) {
+    public String generateToken(User user) {
 
         return Jwts.builder()
-                .setSubject(email)
+                .claim("role", user.getRole().name())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(
                         new Date(
@@ -39,5 +41,16 @@ public class JwtService {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public String extractRole(String token) {
+
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("role", String.class);
     }
 }
