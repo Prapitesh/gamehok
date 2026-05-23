@@ -1,14 +1,22 @@
-# Use Java 17 base image
-FROM eclipse-temurin:17-jdk-alpine
+# ---------- BUILD STAGE ----------
+FROM eclipse-temurin:17-jdk-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy jar file
-COPY target/*.jar app.jar
+COPY . .
 
-# Expose application port
-EXPOSE 8087
+RUN chmod +x mvnw
 
-# Run Spring Boot application
+RUN ./mvnw clean package -DskipTests
+
+
+# ---------- RUN STAGE ----------
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
