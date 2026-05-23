@@ -28,6 +28,9 @@ spring:
 server:
   port: 8087
 
+  profiles:
+    active: dev
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
