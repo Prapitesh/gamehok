@@ -3,6 +3,7 @@ package org.ease.gamehok.service;
 import org.ease.gamehok.entity.Match;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.exception.ResourceNotFoundException;
+import org.ease.gamehok.kafka.MatchResultProducer;
 import org.ease.gamehok.repository.MatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,18 +12,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
@@ -34,6 +33,9 @@ class MatchServiceTest {
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;
+
+    @Mock
+    private MatchResultProducer matchResultProducer;
 
     @InjectMocks
     private MatchService matchService;
@@ -119,7 +121,14 @@ class MatchServiceTest {
                 "Alpha",
                 updated.getWinner().getTeamName()
         );
+
+        verify(matchResultProducer, times(1))
+                .sendMatchResult(anyString());
+
+        verify(messagingTemplate, times(1))
+                .convertAndSend(
+                        eq("/topic/matches"),
+                        any(Object.class)
+                );
     }
-
-
 }
