@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: gamehok-deployment
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: gamehok
+
+  template:
+    metadata:
+      labels:
+        app: gamehok
+
+    spec:
+      containers:
+        - name: gamehok
+          image: gamehok:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8087
