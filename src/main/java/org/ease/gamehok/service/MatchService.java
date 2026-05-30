@@ -10,7 +10,10 @@ import org.ease.gamehok.event.MatchCompletedEvent;
 import org.ease.gamehok.exception.ResourceNotFoundException;
 import org.ease.gamehok.kafka.MatchResultProducer;
 import org.ease.gamehok.repository.MatchRepository;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 

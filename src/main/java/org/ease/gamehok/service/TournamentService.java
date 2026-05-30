@@ -1,8 +1,8 @@
 package org.ease.gamehok.service;
 
+import lombok.RequiredArgsConstructor;
 import org.ease.gamehok.entity.Tournament;
 import org.ease.gamehok.repository.TournamentRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
