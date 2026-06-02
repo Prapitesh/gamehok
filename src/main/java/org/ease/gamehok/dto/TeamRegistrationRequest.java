@@ -12,4 +12,6 @@ public class TeamRegistrationRequest {
     private String teamName;
 
     private List<Long> playerIds;
+
+    private String logoUrl;
 }

@@ -43,7 +43,7 @@ file:
       enabled: true
 
 server:
-  port: 8887
+  port: 9090
 
 logging:
   level:

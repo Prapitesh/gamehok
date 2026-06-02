@@ -2,13 +2,10 @@ package org.ease.gamehok.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.ease.gamehok.dto.TeamRegistrationRequest;
 import org.ease.gamehok.entity.Team;
 import org.ease.gamehok.service.TeamService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,8 +17,10 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping("/register")
-    public Team registerTeam(@Valid @RequestBody Team team) {
-        return teamService.registerTeam(team);
+    public Team registerTeam(
+            @Valid @RequestBody TeamRegistrationRequest request) {
+
+        return teamService.registerTeam(request);
     }
 
     @GetMapping

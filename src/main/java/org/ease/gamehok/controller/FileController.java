@@ -1,5 +1,6 @@
 package org.ease.gamehok.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.ease.gamehok.dto.FileUploadResponse;
 import org.ease.gamehok.service.FileStorageService;
@@ -10,8 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -22,26 +22,19 @@ public class FileController {
 
     private final FileStorageService fileStorageService;
 
+    @Operation(summary = "Upload File")
     @PostMapping(
             value = "/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<FileUploadResponse> uploadFile(
-
-            @Parameter(
-                    description = "File to upload",
-                    required = true,
-                    schema = @Schema(type = "string", format = "binary")
-            )
-            @RequestParam("file")
-            MultipartFile file
-
-    ) throws Exception {
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
 
         String fileName = fileStorageService.storeFile(file);
 
         String downloadUrl =
-                "http://localhost:8887/api/files/" + fileName;
+                "http://localhost:9090/api/files/" + fileName;
 
         return ResponseEntity.ok(
                 new FileUploadResponse(
@@ -56,21 +49,23 @@ public class FileController {
             @PathVariable String fileName
     ) throws Exception {
 
-        Path path = Paths.get("uploads")
+        Path filePath = Paths.get("uploads")
                 .resolve(fileName)
                 .normalize();
 
-        Resource resource = new UrlResource(path.toUri());
+        Resource resource = new UrlResource(filePath.toUri());
 
         if (!resource.exists()) {
             throw new RuntimeException("File not found");
         }
 
+        String contentType = "application/octet-stream";
+
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(MediaType.parseMediaType(contentType))
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" +
+                        "inline; filename=\"" +
                                 resource.getFilename() +
                                 "\""
                 )
