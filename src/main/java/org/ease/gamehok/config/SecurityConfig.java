@@ -142,7 +142,9 @@ public class SecurityConfig {
 
                                 "/api/teams/**",
 
-                                "/api/disputes/**"
+                                "/api/disputes/**",
+
+                                "/api/leaderboards/**"
 
                         )
 
