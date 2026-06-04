@@ -28,4 +28,7 @@ public class Tournament implements Serializable {
     private String status;
 
     private Double prizePool;
+
+    @Column(name = "banner_url")
+    private String bannerUrl;
 }
