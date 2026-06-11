@@ -48,7 +48,13 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8887"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:8887",
+                "https://gamehok-frontend-q9x3ds7o6.vercel.app",
+                "https://gamehok-frontend-beige.vercel.app",
+                "https://gamehok-frontend-q9x3ds7o6.vercel.app"
+        ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 

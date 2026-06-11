@@ -3,6 +3,7 @@ package org.ease.gamehok.service;
 
 import lombok.RequiredArgsConstructor;
 import org.ease.gamehok.entity.Match;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true", matchIfMissing = false)
 public class RedisMatchCacheService {
 
     private final RedisTemplate<String, Object> redisTemplate;

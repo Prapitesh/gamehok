@@ -1,6 +1,5 @@
 package org.ease.gamehok.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ease.gamehok.dto.MatchResponseDto;
 import org.ease.gamehok.dto.MatchUpdateMessage;
@@ -10,6 +9,7 @@ import org.ease.gamehok.event.MatchCompletedEvent;
 import org.ease.gamehok.exception.ResourceNotFoundException;
 import org.ease.gamehok.kafka.MatchResultProducer;
 import org.ease.gamehok.repository.MatchRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +19,22 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MatchService {
 
-    private final MatchResultProducer matchResultProducer;
+    @Autowired(required = false)
+    private MatchResultProducer matchResultProducer;
 
     private final SimpMessagingTemplate messagingTemplate;
 
     private final MatchRepository matchRepository;
 
-    private final RedisMatchCacheService redisMatchCacheService;
+    @Autowired(required = false)
+    private RedisMatchCacheService redisMatchCacheService;
+
+    public MatchService(SimpMessagingTemplate messagingTemplate, MatchRepository matchRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.matchRepository = matchRepository;
+    }
 
     public Match getMatchById(Long matchId) {
 
@@ -101,12 +107,14 @@ public class MatchService {
                         updatedMatch.getStatus()
                 );
 
-        matchResultProducer.sendMatchResult(
-                "Match Completed -> MatchId: "
-                        + updatedMatch.getId()
-                        + ", Winner: "
-                        + winner.getTeamName()
-        );
+        if (matchResultProducer != null) {
+            matchResultProducer.sendMatchResult(
+                    "Match Completed -> MatchId: "
+                            + updatedMatch.getId()
+                            + ", Winner: "
+                            + winner.getTeamName()
+            );
+        }
 
         // WebSocket Message
         MatchUpdateMessage message =
